@@ -1,4 +1,4 @@
-
+// game.js
 
 document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Monsters = [];
     let player2Monsters = [];
     let grid = Array.from({ length: 10 }, () => Array(10).fill(null));
+    let playersOrder = [1, 2];
+    let hasPlacedMonster = false;
+    let movedMonsters = new Set();
 
     function initializeBoard() {
         gameBoard.innerHTML = '';
@@ -35,9 +38,25 @@ document.addEventListener('DOMContentLoaded', () => {
         grid = Array.from({ length: 10 }, () => Array(10).fill(null));
         player1Monsters = [];
         player2Monsters = [];
-        currentTurn = 1;
+        determinePlayersOrder();
+        currentTurn = playersOrder[0];
+        hasPlacedMonster = false;
+        movedMonsters.clear();
         updateDisplays();
         initializeBoard();
+    }
+
+    function determinePlayersOrder() {
+        const player1Count = player1Monsters.length;
+        const player2Count = player2Monsters.length;
+
+        if (player1Count < player2Count) {
+            playersOrder = [1, 2];
+        } else if (player2Count < player1Count) {
+            playersOrder = [2, 1];
+        } else {
+            playersOrder = Math.random() < 0.5 ? [1, 2] : [2, 1];
+        }
     }
 
     function updateDisplays() {
@@ -61,13 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (grid[row][col] && grid[row][col].player === `player${currentTurn}`) {
                 selectedMonster = { row, col };
             } else {
-                if (currentTurn === 1 && col === 0) {
-                    placeMonster(row, col, 'player1');
-                } else if (currentTurn === 2 && col === 9) {
-                    placeMonster(row, col, 'player2');
+                if (!hasPlacedMonster && isValidPlacement(row, col)) {
+                    placeMonster(row, col, `player${currentTurn}`);
                 }
             }
         }
+    }
+
+    function isValidPlacement(row, col) {
+        if (currentTurn === 1 && col !== 0) return false;
+        if (currentTurn === 2 && col !== 9) return false;
+        return grid[row][col] === null;
     }
 
     function placeMonster(row, col, player) {
@@ -86,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             player2Monsters.push(monster);
         }
 
+        hasPlacedMonster = true;
         checkEndTurnCondition();
     }
 
@@ -93,23 +117,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isValidMove(startRow, startCol, endRow, endCol)) return;
 
         const movingMonster = grid[startRow][startCol];
+
+        if (movedMonsters.has(movingMonster)) return; // Monster already moved this turn
+
         const targetCell = grid[endRow][endCol];
 
         if (targetCell) {
-            resolveConflict(movingMonster, targetCell, endRow, endCol);
+            if (targetCell.player === movingMonster.player) return; // Cannot move to a cell occupied by own monster
+            resolveConflict(movingMonster, targetCell, startRow, startCol, endRow, endCol);
         } else {
             grid[startRow][startCol] = null;
             grid[endRow][endCol] = movingMonster;
         }
 
+        movedMonsters.add(movingMonster);
         updateBoard();
         checkEndTurnCondition();
     }
 
     function isValidMove(startRow, startCol, endRow, endCol) {
         if (startRow === endRow && startCol === endCol) return false; // No movement
-        if (grid[endRow][endCol] && grid[endRow][endCol].player !== `player${currentTurn}`) return false; // Can't move to occupied cell by opponent
-
         const rowDiff = Math.abs(endRow - startRow);
         const colDiff = Math.abs(endCol - startCol);
 
@@ -117,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (rowDiff === 0 || colDiff === 0 || (rowDiff === colDiff && rowDiff <= 2));
     }
 
-    function resolveConflict(movingMonster, targetMonster, row, col) {
+    function resolveConflict(movingMonster, targetMonster, startRow, startCol, endRow, endCol) {
         const outcomes = {
             'vampire': { 'werewolf': 'removeTarget', 'ghost': 'removeMoving' },
             'werewolf': { 'ghost': 'removeTarget', 'vampire': 'removeMoving' },
@@ -127,25 +154,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const outcome = outcomes[movingMonster.type][targetMonster.type];
 
         if (outcome === 'removeTarget') {
-            removeMonster(row, col, targetMonster);
-            grid[row][col] = movingMonster;
+            removeMonster(endRow, endCol, targetMonster);
+            grid[endRow][endCol] = movingMonster;
+            grid[startRow][startCol] = null;
         } else if (outcome === 'removeMoving') {
-            removeMonster(row, col, movingMonster);
-            grid[row][col] = targetMonster;
+            removeMonster(startRow, startCol, movingMonster);
         } else {
-            removeMonster(row, col, movingMonster);
-            removeMonster(row, col, targetMonster);
-            grid[row][col] = null;
+            removeMonster(startRow, startCol, movingMonster);
+            removeMonster(endRow, endCol, targetMonster);
         }
+
+        updateBoard();
+        checkEndTurnCondition();
     }
 
     function removeMonster(row, col, monster) {
-        grid[row][col] = null;
         if (monster.player === 'player1') {
             player1Monsters = player1Monsters.filter(m => m !== monster);
         } else {
             player2Monsters = player2Monsters.filter(m => m !== monster);
         }
+        grid[row][col] = null;
+        updateDisplays();
     }
 
     function getRandomMonster() {
@@ -160,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const monster = grid[i][j];
                 if (monster) {
                     cell.textContent = monster.type.charAt(0).toUpperCase();
-                    cell.className = monster.type;
+                    cell.className = monster.type + ' ' + monster.player;
                 } else {
                     cell.textContent = '';
                     cell.className = '';
@@ -170,14 +200,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkEndTurnCondition() {
-        if ((currentTurn === 1 && player1Monsters.length === 0) || (currentTurn === 2 && player2Monsters.length === 0)) {
+        if (hasPlacedMonster || (currentTurn === 1 && player1Monsters.length === 0) || (currentTurn === 2 && player2Monsters.length === 0)) {
             endTurn();
         }
     }
 
     function endTurn() {
-        console.log(`Ending turn for Player ${currentTurn}`);
-        currentTurn = currentTurn === 1 ? 2 : 1;
+        hasPlacedMonster = false;
+        movedMonsters.clear();
+        if (currentTurn === playersOrder[0]) {
+            currentTurn = playersOrder[1];
+        } else {
+            currentTurn = playersOrder[0];
+            determinePlayersOrder(); // Determine the order for the next round
+        }
         updateDisplays();
     }
 
