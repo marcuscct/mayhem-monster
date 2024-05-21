@@ -1,4 +1,4 @@
-// game.js
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameCountDisplay = document.getElementById('game-count');
     const player1WinsDisplay = document.getElementById('player1-wins');
     const player2WinsDisplay = document.getElementById('player2-wins');
+    const endTurnBtn = document.getElementById('end-turn-btn');
 
     let gameCount = 0;
     let player1Wins = 0;
@@ -85,17 +86,24 @@ document.addEventListener('DOMContentLoaded', () => {
             player2Monsters.push(monster);
         }
 
-        endTurn();
+        checkEndTurnCondition();
     }
 
     function moveMonster(startRow, startCol, endRow, endCol) {
         if (!isValidMove(startRow, startCol, endRow, endCol)) return;
 
-        const monster = grid[startRow][startCol];
-        grid[startRow][startCol] = null;
-        grid[endRow][endCol] = monster;
+        const movingMonster = grid[startRow][startCol];
+        const targetCell = grid[endRow][endCol];
+
+        if (targetCell) {
+            resolveConflict(movingMonster, targetCell, endRow, endCol);
+        } else {
+            grid[startRow][startCol] = null;
+            grid[endRow][endCol] = movingMonster;
+        }
+
         updateBoard();
-        endTurn();
+        checkEndTurnCondition();
     }
 
     function isValidMove(startRow, startCol, endRow, endCol) {
@@ -107,6 +115,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Valid moves: horizontal, vertical, or diagonal up to 2 squares
         return (rowDiff === 0 || colDiff === 0 || (rowDiff === colDiff && rowDiff <= 2));
+    }
+
+    function resolveConflict(movingMonster, targetMonster, row, col) {
+        const outcomes = {
+            'vampire': { 'werewolf': 'removeTarget', 'ghost': 'removeMoving' },
+            'werewolf': { 'ghost': 'removeTarget', 'vampire': 'removeMoving' },
+            'ghost': { 'vampire': 'removeTarget', 'werewolf': 'removeMoving' }
+        };
+
+        const outcome = outcomes[movingMonster.type][targetMonster.type];
+
+        if (outcome === 'removeTarget') {
+            removeMonster(row, col, targetMonster);
+            grid[row][col] = movingMonster;
+        } else if (outcome === 'removeMoving') {
+            removeMonster(row, col, movingMonster);
+            grid[row][col] = targetMonster;
+        } else {
+            removeMonster(row, col, movingMonster);
+            removeMonster(row, col, targetMonster);
+            grid[row][col] = null;
+        }
+    }
+
+    function removeMonster(row, col, monster) {
+        grid[row][col] = null;
+        if (monster.player === 'player1') {
+            player1Monsters = player1Monsters.filter(m => m !== monster);
+        } else {
+            player2Monsters = player2Monsters.filter(m => m !== monster);
+        }
     }
 
     function getRandomMonster() {
@@ -130,11 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function checkEndTurnCondition() {
+        if ((currentTurn === 1 && player1Monsters.length === 0) || (currentTurn === 2 && player2Monsters.length === 0)) {
+            endTurn();
+        }
+    }
+
     function endTurn() {
+        console.log(`Ending turn for Player ${currentTurn}`);
         currentTurn = currentTurn === 1 ? 2 : 1;
         updateDisplays();
     }
 
+    endTurnBtn.addEventListener('click', endTurn);
     gameBoard.addEventListener('click', handleCellClick);
     startNewGame();
 });
