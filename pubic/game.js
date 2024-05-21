@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Wins = 0;
     let player2Wins = 0;
     let currentTurn = 1;
+    let selectedMonster = null;
     let player1Monsters = [];
     let player2Monsters = [];
     let grid = Array.from({ length: 10 }, () => Array(10).fill(null));
@@ -52,10 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const row = parseInt(cell.dataset.row);
         const col = parseInt(cell.dataset.col);
 
-        if (currentTurn === 1 && col === 0) {
-            placeMonster(row, col, 'player1');
-        } else if (currentTurn === 2 && col === 9) {
-            placeMonster(row, col, 'player2');
+        if (selectedMonster) {
+            moveMonster(selectedMonster.row, selectedMonster.col, row, col);
+            selectedMonster = null;
+        } else {
+            if (grid[row][col] && grid[row][col].player === `player${currentTurn}`) {
+                selectedMonster = { row, col };
+            } else {
+                if (currentTurn === 1 && col === 0) {
+                    placeMonster(row, col, 'player1');
+                } else if (currentTurn === 2 && col === 9) {
+                    placeMonster(row, col, 'player2');
+                }
+            }
         }
     }
 
@@ -76,6 +86,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         endTurn();
+    }
+
+    function moveMonster(startRow, startCol, endRow, endCol) {
+        if (!isValidMove(startRow, startCol, endRow, endCol)) return;
+
+        const monster = grid[startRow][startCol];
+        grid[startRow][startCol] = null;
+        grid[endRow][endCol] = monster;
+        updateBoard();
+        endTurn();
+    }
+
+    function isValidMove(startRow, startCol, endRow, endCol) {
+        if (startRow === endRow && startCol === endCol) return false; // No movement
+        if (grid[endRow][endCol] && grid[endRow][endCol].player !== `player${currentTurn}`) return false; // Can't move to occupied cell by opponent
+
+        const rowDiff = Math.abs(endRow - startRow);
+        const colDiff = Math.abs(endCol - startCol);
+
+        // Valid moves: horizontal, vertical, or diagonal up to 2 squares
+        return (rowDiff === 0 || colDiff === 0 || (rowDiff === colDiff && rowDiff <= 2));
     }
 
     function getRandomMonster() {
