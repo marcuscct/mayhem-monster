@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let playersOrder = [1, 2];
     let hasPlacedMonster = false;
     let movedMonsters = new Set();
+    let newlyPlacedMonster = null;
 
     function initializeBoard() {
         gameBoard.innerHTML = '';
@@ -42,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTurn = playersOrder[0];
         hasPlacedMonster = false;
         movedMonsters.clear();
+        newlyPlacedMonster = null;
         updateDisplays();
         initializeBoard();
     }
@@ -78,6 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedMonster = null;
         } else {
             if (grid[row][col] && grid[row][col].player === `player${currentTurn}`) {
+                if (newlyPlacedMonster && newlyPlacedMonster.row === row && newlyPlacedMonster.col === col) {
+                    // Newly placed monster cannot be selected for movement
+                    return;
+                }
                 selectedMonster = { row, col };
             } else {
                 if (!hasPlacedMonster && isValidPlacement(row, col)) {
@@ -98,7 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const monster = {
             type: getRandomMonster(),
-            player: player
+            player: player,
+            row: row,
+            col: col
         };
 
         grid[row][col] = monster;
@@ -110,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         hasPlacedMonster = true;
+        newlyPlacedMonster = monster;
         checkEndTurnCondition();
     }
 
@@ -207,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endTurn() {
         hasPlacedMonster = false;
+        newlyPlacedMonster = null;
         movedMonsters.clear();
         if (currentTurn === playersOrder[0]) {
             currentTurn = playersOrder[1];
