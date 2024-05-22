@@ -1,4 +1,4 @@
-// game.js
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedMonster = null;
     let player1Monsters = [];
     let player2Monsters = [];
+    let player1Eliminations = 0;
+    let player2Eliminations = 0;
     let grid = Array.from({ length: 10 }, () => Array(10).fill(null));
     let playersOrder = [1, 2];
     let hasPlacedMonster = false;
@@ -39,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
         grid = Array.from({ length: 10 }, () => Array(10).fill(null));
         player1Monsters = [];
         player2Monsters = [];
+        player1Eliminations = 0;
+        player2Eliminations = 0;
         determinePlayersOrder();
         currentTurn = playersOrder[0];
         hasPlacedMonster = false;
@@ -180,8 +184,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function removeMonster(row, col, monster) {
         if (monster.player === 'player1') {
             player1Monsters = player1Monsters.filter(m => m !== monster);
+            player1Eliminations++;
+            if (player1Eliminations >= 10) {
+                player2Wins++;
+                gameCount++;
+                updateDisplays();
+                alert('Player 1 has been eliminated! Player 2 wins!');
+                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                return;
+            }
         } else {
             player2Monsters = player2Monsters.filter(m => m !== monster);
+            player2Eliminations++;
+            if (player2Eliminations >= 10) {
+                player1Wins++;
+                gameCount++;
+                updateDisplays();
+                alert('Player 2 has been eliminated! Player 1 wins!');
+                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                return;
+            }
         }
         grid[row][col] = null;
         updateDisplays();
