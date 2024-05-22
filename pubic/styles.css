@@ -62,3 +62,16 @@ body {
     cursor: pointer;
 }
 
+@keyframes move {
+    from {
+        transform: translate(0);
+    }
+    to {
+        transform: translate(var(--move-x), var(--move-y));
+    }
+}
+
+.moving {
+    animation: move 0.5s forwards;
+}
+

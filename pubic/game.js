@@ -128,25 +128,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function moveMonster(startRow, startCol, endRow, endCol) {
         if (!isValidMove(startRow, startCol, endRow, endCol)) return;
-
+    
         const movingMonster = grid[startRow][startCol];
-
+    
         if (movedMonsters.has(movingMonster)) return; // Monster already moved this turn
-
+    
         const targetCell = grid[endRow][endCol];
-
+    
         if (targetCell) {
             if (targetCell.player === movingMonster.player) return; // Cannot move to a cell occupied by own monster
             resolveConflict(movingMonster, targetCell, startRow, startCol, endRow, endCol);
         } else {
-            grid[startRow][startCol] = null;
-            grid[endRow][endCol] = movingMonster;
+            const moveX = (endCol - startCol) * 40; // Adjust according to your cell size
+            const moveY = (endRow - startRow) * 40; // Adjust according to your cell size
+            const cell = gameBoard.querySelector(`div[data-row="${startRow}"][data-col="${startCol}"]`);
+            cell.style.setProperty('--move-x', `${moveX}px`);
+            cell.style.setProperty('--move-y', `${moveY}px`);
+            cell.classList.add('moving');
+    
+            setTimeout(() => {
+                grid[startRow][startCol] = null;
+                grid[endRow][endCol] = movingMonster;
+                updateBoard();
+                checkEndTurnCondition();
+            }, 500); // Duration of the animation
         }
-
+    
         movedMonsters.add(movingMonster);
-        updateBoard();
-        checkEndTurnCondition();
     }
+    
 
     function isValidMove(startRow, startCol, endRow, endCol) {
         if (startRow === endRow && startCol === endCol) return false; // No movement
