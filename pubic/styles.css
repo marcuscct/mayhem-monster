@@ -1,26 +1,42 @@
 
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Cinzel', serif;
+    background-color: #f4e9cd;
+    color: #4a3b30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background-image: url('images/parchment_background.jpg'); /* Add a medieval parchment background image */
+    background-size: cover;
 }
 
 #game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border: 10px solid #4a3b30;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 #game-board {
     display: grid;
-    grid-template-columns: repeat(10, 40px);
-    grid-template-rows: repeat(10, 40px);
-    gap: 2px;
+    grid-template-columns: repeat(10, 50px);
+    grid-template-rows: repeat(10, 50px);
+    gap: 5px;
     margin-bottom: 20px;
 }
 
 #game-board div {
-    width: 40px;
-    height: 40px;
-    border: 1px solid black;
+    width: 50px;
+    height: 50px;
+    border: 2px solid #4a3b30;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,11 +44,37 @@ body {
     font-size: 1.2em;
 }
 
+.texture1 {
+    background-image: url('images/stone_texture1.jpg'); /* Add the stone texture image */
+    background-size: cover;
+}
+
+.texture2 {
+    background-image: url('images/stone_texture2.jpg'); /* Add the stone texture image */
+    background-size: cover;
+}
+
+.texture3 {
+    background-image: url('images/stone_texture3.jpg'); /* Add the stone texture image */
+    background-size: cover;
+}
+
+.texture4 {
+    background-image: url('images/stone_texture4.jpg'); /* Add the stone texture image */
+    background-size: cover;
+}
+
+.texture5 {
+    background-image: url('images/stone_texture5.jpg'); /* Add the stone texture image */
+    background-size: cover;
+}
+
 #player-stats, #game-info {
     margin: 10px;
     display: flex;
     justify-content: space-around;
     width: 100%;
+    font-size: 1.2em;
 }
 
 #player-stats div, #win-stats div {
@@ -48,11 +90,13 @@ body {
 }
 
 .player1 {
-    background-color: lightblue;
+    background-color: rgba(173, 216, 230, 0.8);
+    border: 2px solid blue;
 }
 
 .player2 {
-    background-color: lightcoral;
+    background-color: rgba(255, 192, 203, 0.8);
+    border: 2px solid red;
 }
 
 #end-turn-btn {
@@ -60,18 +104,13 @@ body {
     padding: 10px 20px;
     font-size: 1em;
     cursor: pointer;
+    background-color: #4a3b30;
+    color: #f4e9cd;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes move {
-    from {
-        transform: translate(0);
-    }
-    to {
-        transform: translate(var(--move-x), var(--move-y));
-    }
+#end-turn-btn:hover {
+    background-color: #3b2f25;
 }
-
-.moving {
-    animation: move 0.5s forwards;
-}
-

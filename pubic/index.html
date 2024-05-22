@@ -5,21 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monster Mayhem</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet"> <!-- Add medieval-style font -->
 </head>
 <body>
     <div id="game-container">
         <div id="game-board"></div>
         <div id="player-stats">
-            <div id="player1-stats">Player 1: <span id="player1-monsters">0</span></div>
-            <div id="player2-stats">Player 2: <span id="player2-monsters">0</span></div>
+            <div id="player1-stats">Player 1 Monsters: <span id="player1-monsters"></span></div>
+            <div id="player2-stats">Player 2 Monsters: <span id="player2-monsters"></span></div>
         </div>
         <div id="game-info">
-            <div id="current-turn">Current Turn: Player 1</div>
-            <div id="game-count">Games Played: 0</div>
-            <div id="win-stats">
-                <div>Player 1 Wins: <span id="player1-wins">0</span></div>
-                <div>Player 2 Wins: <span id="player2-wins">0</span></div>
-            </div>
+            <div>Current Turn: <span id="current-turn"></span></div>
+            <div>Total Games: <span id="game-count"></span></div>
+            <div>Player 1 Wins: <span id="player1-wins"></span></div>
+            <div>Player 2 Wins: <span id="player2-wins"></span></div>
         </div>
         <button id="end-turn-btn">End Turn</button>
     </div>

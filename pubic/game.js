@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Wins = 0;
     let player2Wins = 0;
     let currentTurn = 1;
-    let turnCount = 0; // New variable to keep track of the number of turns
+    let turnCount = 0;
     let selectedMonster = null;
     let player1Monsters = [];
     let player2Monsters = [];
@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let movedMonsters = new Set();
     let newlyPlacedMonster = null;
 
+    const textures = ['texture1', 'texture2', 'texture3', 'texture4', 'texture5'];
+
     function initializeBoard() {
         gameBoard.innerHTML = '';
         for (let i = 0; i < 10; i++) {
@@ -33,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cell = document.createElement('div');
                 cell.dataset.row = i;
                 cell.dataset.col = j;
+                const randomTexture = textures[Math.floor(Math.random() * textures.length)];
+                cell.classList.add(randomTexture);
                 gameBoard.appendChild(cell);
             }
         }
@@ -44,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Monsters = [];
         player1Eliminations = 0;
         player2Eliminations = 0;
-        turnCount = 0; // Reset turn count
+        turnCount = 0;
         determinePlayersOrder();
         currentTurn = playersOrder[0];
         hasPlacedMonster = false;
@@ -87,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (grid[row][col] && grid[row][col].player === `player${currentTurn}`) {
                 if (newlyPlacedMonster && newlyPlacedMonster.row === row && newlyPlacedMonster.col === col) {
-                    // Newly placed monster cannot be selected for movement
                     return;
                 }
                 selectedMonster = { row, col };
@@ -133,12 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const movingMonster = grid[startRow][startCol];
 
-        if (movedMonsters.has(movingMonster)) return; // Monster already moved this turn
+        if (movedMonsters.has(movingMonster)) return;
 
         const targetCell = grid[endRow][endCol];
 
         if (targetCell) {
-            if (targetCell.player === movingMonster.player) return; // Cannot move to a cell occupied by own monster
+            if (targetCell.player === movingMonster.player) return;
             resolveConflict(movingMonster, targetCell, startRow, startCol, endRow, endCol);
         } else {
             grid[startRow][startCol] = null;
@@ -151,11 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function isValidMove(startRow, startCol, endRow, endCol) {
-        if (startRow === endRow && startCol === endCol) return false; // No movement
+        if (startRow === endRow && startCol === endCol) return false;
         const rowDiff = Math.abs(endRow - startRow);
         const colDiff = Math.abs(endCol - startCol);
 
-        // Valid moves: horizontal, vertical, or diagonal up to 2 squares
         return (rowDiff === 0 || colDiff === 0 || (rowDiff === colDiff && rowDiff <= 2));
     }
 
@@ -192,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameCount++;
                 updateDisplays();
                 alert('Player 1 has been eliminated! Player 2 wins!');
-                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                setTimeout(startNewGame, 2000);
                 return;
             }
         } else {
@@ -203,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameCount++;
                 updateDisplays();
                 alert('Player 2 has been eliminated! Player 1 wins!');
-                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                setTimeout(startNewGame, 2000);
                 return;
             }
         }
@@ -226,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cell.className = monster.type + ' ' + monster.player;
                 } else {
                     cell.textContent = '';
-                    cell.className = '';
+                    cell.className = cell.className.replace(/\b(player1|player2)\b/g, '').trim();
                 }
             }
         }
@@ -239,14 +241,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameCount++;
                 updateDisplays();
                 alert('Player 1 has no monsters left! Player 2 wins!');
-                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                setTimeout(startNewGame, 2000);
                 return;
             } else if (player2Monsters.length === 0) {
                 player1Wins++;
                 gameCount++;
                 updateDisplays();
                 alert('Player 2 has no monsters left! Player 1 wins!');
-                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                setTimeout(startNewGame, 2000);
                 return;
             }
         }
@@ -260,12 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
         hasPlacedMonster = false;
         newlyPlacedMonster = null;
         movedMonsters.clear();
-        turnCount++; // Increment turn count at the end of each turn
+        turnCount++;
         if (currentTurn === playersOrder[0]) {
             currentTurn = playersOrder[1];
         } else {
             currentTurn = playersOrder[0];
-            determinePlayersOrder(); // Determine the order for the next round
+            determinePlayersOrder();
         }
         updateDisplays();
     }
