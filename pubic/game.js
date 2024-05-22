@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let player1Wins = 0;
     let player2Wins = 0;
     let currentTurn = 1;
+    let turnCount = 0; // New variable to keep track of the number of turns
     let selectedMonster = null;
     let player1Monsters = [];
     let player2Monsters = [];
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player2Monsters = [];
         player1Eliminations = 0;
         player2Eliminations = 0;
+        turnCount = 0; // Reset turn count
         determinePlayersOrder();
         currentTurn = playersOrder[0];
         hasPlacedMonster = false;
@@ -128,35 +130,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function moveMonster(startRow, startCol, endRow, endCol) {
         if (!isValidMove(startRow, startCol, endRow, endCol)) return;
-    
+
         const movingMonster = grid[startRow][startCol];
-    
+
         if (movedMonsters.has(movingMonster)) return; // Monster already moved this turn
-    
+
         const targetCell = grid[endRow][endCol];
-    
+
         if (targetCell) {
             if (targetCell.player === movingMonster.player) return; // Cannot move to a cell occupied by own monster
             resolveConflict(movingMonster, targetCell, startRow, startCol, endRow, endCol);
         } else {
-            const moveX = (endCol - startCol) * 40; // Adjust according to your cell size
-            const moveY = (endRow - startRow) * 40; // Adjust according to your cell size
-            const cell = gameBoard.querySelector(`div[data-row="${startRow}"][data-col="${startCol}"]`);
-            cell.style.setProperty('--move-x', `${moveX}px`);
-            cell.style.setProperty('--move-y', `${moveY}px`);
-            cell.classList.add('moving');
-    
-            setTimeout(() => {
-                grid[startRow][startCol] = null;
-                grid[endRow][endCol] = movingMonster;
-                updateBoard();
-                checkEndTurnCondition();
-            }, 500); // Duration of the animation
+            grid[startRow][startCol] = null;
+            grid[endRow][endCol] = movingMonster;
         }
-    
+
         movedMonsters.add(movingMonster);
+        updateBoard();
+        checkEndTurnCondition();
     }
-    
 
     function isValidMove(startRow, startCol, endRow, endCol) {
         if (startRow === endRow && startCol === endCol) return false; // No movement
@@ -241,6 +233,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkEndTurnCondition() {
+        if (turnCount > 0) {
+            if (player1Monsters.length === 0) {
+                player2Wins++;
+                gameCount++;
+                updateDisplays();
+                alert('Player 1 has no monsters left! Player 2 wins!');
+                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                return;
+            } else if (player2Monsters.length === 0) {
+                player1Wins++;
+                gameCount++;
+                updateDisplays();
+                alert('Player 2 has no monsters left! Player 1 wins!');
+                setTimeout(startNewGame, 2000); // Wait 2 seconds before starting a new game
+                return;
+            }
+        }
+
         if (hasPlacedMonster || (currentTurn === 1 && player1Monsters.length === 0) || (currentTurn === 2 && player2Monsters.length === 0)) {
             endTurn();
         }
@@ -250,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hasPlacedMonster = false;
         newlyPlacedMonster = null;
         movedMonsters.clear();
+        turnCount++; // Increment turn count at the end of each turn
         if (currentTurn === playersOrder[0]) {
             currentTurn = playersOrder[1];
         } else {
