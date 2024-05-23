@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let hasPlacedMonster = false;
     let movedMonsters = new Set();
     let newlyPlacedMonster = null;
+    let gameInProgress = true;
 
     const textures = ['texture1', 'texture2', 'texture3', 'texture4', 'texture5'];
 
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startNewGame() {
+        gameInProgress = true;
         grid = Array.from({ length: 10 }, () => Array(10).fill(null));
         player1Monsters = [];
         player2Monsters = [];
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateDisplays() {
-        currentTurnDisplay.textContent = `Current Turn: Player ${currentTurn}`;
+        currentTurnDisplay.textContent = `Player ${currentTurn}`;
         player1MonstersDisplay.textContent = player1Monsters.length;
         player2MonstersDisplay.textContent = player2Monsters.length;
         gameCountDisplay.textContent = gameCount;
@@ -81,7 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleCellClick(event) {
-        const cell = event.target;
+        const cell = event.target.closest('div[data-row]');
+        if (!cell || !gameInProgress) return;
         const row = parseInt(cell.dataset.row);
         const col = parseInt(cell.dataset.col);
 
@@ -156,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function isValidMove(startRow, startCol, endRow, endCol) {
         if (startRow === endRow && startCol === endCol) return false;
         const rowDiff = Math.abs(endRow - startRow);
-        const colDiff = Math.abs(endCol - startCol);
+        const colDiff = Math.abs(endCol - endCol);
 
         return (rowDiff === 0 || colDiff === 0 || (rowDiff === colDiff && rowDiff <= 2));
     }
@@ -190,22 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
             player1Monsters = player1Monsters.filter(m => m !== monster);
             player1Eliminations++;
             if (player1Eliminations >= 10) {
-                player2Wins++;
-                gameCount++;
-                updateDisplays();
-                alert('Player 1 has been eliminated! Player 2 wins!');
-                setTimeout(startNewGame, 2000);
+                endGame('player2');
                 return;
             }
         } else {
             player2Monsters = player2Monsters.filter(m => m !== monster);
             player2Eliminations++;
             if (player2Eliminations >= 10) {
-                player1Wins++;
-                gameCount++;
-                updateDisplays();
-                alert('Player 2 has been eliminated! Player 1 wins!');
-                setTimeout(startNewGame, 2000);
+                endGame('player1');
                 return;
             }
         }
@@ -224,10 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cell = gameBoard.querySelector(`div[data-row="${i}"][data-col="${j}"]`);
                 const monster = grid[i][j];
                 if (monster) {
-                    cell.textContent = monster.type.charAt(0).toUpperCase();
-                    cell.className = monster.type + ' ' + monster.player;
+                    cell.innerHTML = `<img src="images/${monster.type}.jpg" alt="${monster.type}" class="monster-image ${monster.player}">`;
+                    cell.className = cell.className.replace(/\b(player1|player2)\b/g, '').trim();
+                    cell.classList.add(monster.player);
                 } else {
-                    cell.textContent = '';
+                    cell.innerHTML = '';
                     cell.className = cell.className.replace(/\b(player1|player2)\b/g, '').trim();
                 }
             }
@@ -235,20 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function checkEndTurnCondition() {
+        if (!gameInProgress) return;
+
         if (turnCount > 0) {
             if (player1Monsters.length === 0) {
-                player2Wins++;
-                gameCount++;
-                updateDisplays();
-                alert('Player 1 has no monsters left! Player 2 wins!');
-                setTimeout(startNewGame, 2000);
+                endGame('player2');
                 return;
             } else if (player2Monsters.length === 0) {
-                player1Wins++;
-                gameCount++;
-                updateDisplays();
-                alert('Player 2 has no monsters left! Player 1 wins!');
-                setTimeout(startNewGame, 2000);
+                endGame('player1');
                 return;
             }
         }
@@ -256,6 +246,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasPlacedMonster || (currentTurn === 1 && player1Monsters.length === 0) || (currentTurn === 2 && player2Monsters.length === 0)) {
             endTurn();
         }
+    }
+
+    function endGame(winningPlayer) {
+        gameInProgress = false;
+        gameCount++;
+        if (winningPlayer === 'player1') {
+            player1Wins++;
+            alert('Player 2 has been eliminated! Player 1 wins!');
+        } else {
+            player2Wins++;
+            alert('Player 1 has been eliminated! Player 2 wins!');
+        }
+        updateDisplays();
+        setTimeout(startNewGame, 2000);
     }
 
     function endTurn() {
