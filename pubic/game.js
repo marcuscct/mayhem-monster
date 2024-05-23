@@ -54,8 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
         determinePlayersOrder();
         currentTurn = playersOrder[0];
         hasPlacedMonster = false;
-        movedMonsters.clear();
         newlyPlacedMonster = null;
+        movedMonsters.clear();
         updateDisplays();
         initializeBoard();
     }
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function isValidMove(startRow, startCol, endRow, endCol) {
         if (startRow === endRow && startCol === endCol) return false;
         const rowDiff = Math.abs(endRow - startRow);
-        const colDiff = Math.abs(endCol - endCol);
+        const colDiff = Math.abs(endCol - startCol);
 
         return (rowDiff === 0 || colDiff === 0 || (rowDiff === colDiff && rowDiff <= 2));
     }

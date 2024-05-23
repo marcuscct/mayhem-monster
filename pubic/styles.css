@@ -10,7 +10,7 @@ body {
     justify-content: flex-start;
     height: 100vh;
     margin: 0;
-    background-image: url('images/castle_background.jpeg');
+    background-image: url('images/castle_background.jpeg'); 
     background-size: cover;
     overflow: hidden;
 }
@@ -18,13 +18,13 @@ body {
 #title-container {
     width: 100%;
     text-align: center;
-    padding: 10px 0; 
+    padding: 10px 0;
 }
 
 #game-title {
     font-family: 'Nosifer', cursive;
     color: purple;
-    font-size: 2.5em;
+    font-size: 2.5em; 
     text-shadow: 2px 2px 4px green;
 }
 
@@ -45,14 +45,14 @@ body {
     max-width: 1000px;
     margin-top: 10px;
     overflow-y: hidden; 
-
+}
 
 #player1-stats, #player2-stats {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 1.2em;
+    font-size: 1.2em; 
     font-weight: bold;
 }
 
@@ -78,21 +78,21 @@ body {
 
 #game-board {
     display: grid;
-    grid-template-columns: repeat(10, 35px); 
-    grid-template-rows: repeat(10, 35px); 
-    gap: 3px; 
-    margin-bottom: 10px; 
+    grid-template-columns: repeat(10, 35px);
+    grid-template-rows: repeat(10, 35px);
+    gap: 3px;
+    margin-bottom: 10px;
 }
 
 #game-board div {
     width: 35px;
     height: 35px; 
-    border: 1px solid #000000; 
+    border: 1px solid #000000;
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    font-size: 0.9em; 
+    font-size: 0.9em;
     background-size: cover;
 }
 
@@ -109,12 +109,12 @@ body {
 }
 
 .texture4 {
-    background-image: url('images/stone_texture4.jpg'); 
+    background-image: url('images/stone_texture4.jpg');
 }
 
 .texture5 {
-    background-image: url('images/stone_texture5.jpg');
-}
+    background-image: url('images/stone_texture5.jpg'); 
+
 
 #game-info {
     grid-area: game-info;
@@ -149,12 +149,12 @@ body {
 }
 
 .player1 {
-    border: 2px solid rgb(189, 28, 28); /* Border color for Player 1 */
+    border: 2px solid rgb(189, 28, 28); 
     border-radius: 5px;
 }
 
 .player2 {
-    border: 2px solid rgb(176, 238, 7); /* Border color for Player 2 */
+    border: 2px solid rgb(176, 238, 7); 
     border-radius: 5px;
 }
 
