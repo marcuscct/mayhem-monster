@@ -1,0 +1,183 @@
+body {
+    font-family: 'Cinzel', serif;
+    background-color: #f4e9cd;
+    color: #4a3b30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    margin: 0;
+    background-image: url('images/castle_background.jpeg');
+    background-size: cover;
+    overflow: hidden;
+}
+
+#title-container {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+}
+
+#game-title {
+    font-family: 'Nosifer', cursive;
+    color: purple;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px green;
+}
+
+#game-container {
+    display: grid;
+    grid-template-areas: 
+        "player-stats game-board game-info"
+        "controls controls controls";
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: 1fr auto;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border: 5px solid #000000;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 1200px;
+    margin-top: 10px;
+}
+
+#player-stats {
+    grid-area: player-stats;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: black;
+    text-shadow: 2px 2px 4px rgb(189, 28, 28);
+}
+
+#game-board-container {
+    grid-area: game-board;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(10, 35px);
+    grid-template-rows: repeat(10, 35px);
+    gap: 3px;
+    margin-bottom: 10px;
+}
+
+#game-board div {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    background-size: cover;
+}
+
+.texture1 {
+    background-image: url('images/stone_texture1.jpg');
+}
+
+.texture2 {
+    background-image: url('images/stone_texture2.jpg');
+}
+
+.texture3 {
+    background-image: url('images/stone_texture3.jpg');
+}
+
+.texture4 {
+    background-image: url('images/stone_texture4.jpg');
+}
+
+.texture5 {
+    background-image: url('images/stone_texture5.jpg');
+}
+
+#game-info {
+    grid-area: game-info;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: black;
+}
+
+#controls {
+    grid-area: controls;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#end-turn-btn {
+    padding: 5px 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+    background-color: purple;
+    color: #f4e9cd;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+#end-turn-btn:hover {
+    background-color: #3b2f25;
+}
+
+.monster-image {
+    width: 90%;
+    height: 90%;
+}
+
+.player1 {
+    border: 2px solid rgb(189, 28, 28);
+    border-radius: 5px;
+}
+
+.player2 {
+    border: 2px solid rgb(233, 254, 8);
+    border-radius: 5px;
+}
+
+.player3 {
+    border: 2px solid rgb(5, 154, 5);
+    border-radius: 5px;
+}
+
+.player4 {
+    border: 2px solid rgb(0, 0, 255);
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    #game-container {
+        grid-template-areas: 
+            "player-stats"
+            "game-board"
+            "game-info"
+            "controls";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+    }
+
+    #player-stats, #game-board-container, #game-info, #controls {
+        justify-content: flex-start;
+    }
+
+    #game-title {
+        font-size: 2em;
+    }
+}
