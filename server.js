@@ -22,6 +22,7 @@ let gameState = {
     turnCount: 0,
     playerMonsters: [[], [], [], []],
     eliminations: [0, 0, 0, 0],
+    eliminatedPlayers: [false, false, false, false], // Track eliminated players
     grid: Array.from({ length: 10 }, () => Array(10).fill(null)),
     playersOrder: [1, 2, 3, 4],
     hasPlacedMonster: false,
@@ -54,6 +55,15 @@ wss.on('connection', (ws) => {
 });
 
 function handleClientMessage(ws, data, playerNumber) {
+    if (playerNumber !== gameState.currentTurn) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Not your turn' }));
+        return;
+    }
+    if (gameState.eliminatedPlayers[playerNumber - 1]) {
+        ws.send(JSON.stringify({ type: 'error', message: 'You are eliminated' }));
+        return;
+    }
+
     switch (data.type) {
         case 'placeMonster':
             placeMonster(data.row, data.col, playerNumber);
@@ -75,11 +85,11 @@ function broadcastGameState() {
 
 function determinePlayersOrder() {
     const playerCounts = gameState.playerMonsters.map(monsters => monsters.length);
-    const minCount = Math.min(...playerCounts);
-    const playersWithMinCount = gameState.playersOrder.filter((_, index) => playerCounts[index] === minCount);
+    const minCount = Math.min(...playerCounts.filter((count, index) => !gameState.eliminatedPlayers[index]));
+    const playersWithMinCount = gameState.playersOrder.filter((_, index) => playerCounts[index] === minCount && !gameState.eliminatedPlayers[index]);
     const startPlayer = playersWithMinCount[Math.floor(Math.random() * playersWithMinCount.length)];
-    
-    const remainingPlayers = gameState.playersOrder.filter(player => player !== startPlayer);
+
+    const remainingPlayers = gameState.playersOrder.filter(player => player !== startPlayer && !gameState.eliminatedPlayers[player - 1]);
     gameState.playersOrder = [startPlayer, ...remainingPlayers];
 }
 
@@ -152,18 +162,12 @@ function removeMonster(row, col, monster) {
     const playerIndex = parseInt(monster.player.replace('player', '')) - 1;
     gameState.playerMonsters[playerIndex] = gameState.playerMonsters[playerIndex].filter(m => m !== monster);
     gameState.eliminations[playerIndex]++;
-    if (gameState.eliminations[playerIndex] >= 10 || gameState.playerMonsters[playerIndex].length === 0) {
-        // End the game when only one player has monsters left
-        if (gameState.playerMonsters.filter(m => m.length > 0).length === 1) {
-            endGame(`player${gameState.playerMonsters.findIndex(m => m.length > 0) + 1}`);
-        }
-        return;
-    }
     gameState.grid[row][col] = null;
 }
 
 function checkEndTurnCondition() {
     if (!gameState.gameInProgress) return;
+
     if (gameState.firstRound) {
         const allPlayersPlaced = gameState.playerMonsters.every(monsters => monsters.length > 0);
         if (allPlayersPlaced) {
@@ -179,14 +183,21 @@ function checkEndTurnCondition() {
         if (allPlayersPlaced) {
             resetMonstersPlacedThisRound(); // Reset the counter for the next round
         }
-    }
 
-    if (gameState.turnCount > 0) {
+        // Eliminate players with no monsters
         for (let i = 0; i < 4; i++) {
-            if (gameState.playerMonsters[i].length === 0) {
-                endGame(`player${(i + 1) % 4 + 1}`);
-                return;
+            if (!gameState.eliminatedPlayers[i] && gameState.playerMonsters[i].length === 0) {
+                gameState.eliminatedPlayers[i] = true;
+                console.log(`Player ${i + 1} has been eliminated.`);
             }
+        }
+
+        // Check if only one player remains with monsters
+        const activePlayers = gameState.eliminatedPlayers.filter(eliminated => !eliminated);
+        if (activePlayers.length === 1) {
+            const winnerIndex = gameState.eliminatedPlayers.findIndex(eliminated => !eliminated);
+            endGame(`player${winnerIndex + 1}`);
+            return;
         }
     }
 
@@ -209,8 +220,10 @@ function endTurn() {
     gameState.hasPlacedMonster = false;
     gameState.newlyPlacedMonster = null;
     gameState.movedMonsters.clear();
-    gameState.turnCount++;
-    gameState.currentTurn = gameState.playersOrder[gameState.turnCount % 4];
+    do {
+        gameState.turnCount++;
+        gameState.currentTurn = gameState.playersOrder[gameState.turnCount % 4];
+    } while (gameState.eliminatedPlayers[gameState.currentTurn - 1] && gameState.turnCount < 100);
     broadcastGameState();
 }
 
@@ -228,6 +241,7 @@ function startNewGame() {
     gameState.grid = Array.from({ length: 10 }, () => Array(10).fill(null));
     gameState.playerMonsters = [[], [], [], []];
     gameState.eliminations = [0, 0, 0, 0];
+    gameState.eliminatedPlayers = [false, false, false, false]; // Reset eliminated players
     gameState.turnCount = 0;
     gameState.firstRound = true; // Reset first round
     gameState.playersOrder = [1, 2, 3, 4]; // Reset player order

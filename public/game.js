@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'gameState':
                 updateGameState(data.gameState);
                 break;
+            case 'error':
+                alert(data.message);
+                break;
         }
     };
 
@@ -97,6 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
     gameBoard.addEventListener('click', handleCellClick);
 
     function handleCellClick(event) {
+        if (playerNumber !== gameState.currentTurn) return; // Ensure only the current player can take action
+
         const cell = event.target.closest('div[data-row]');
         if (!cell || !gameState.gameInProgress) return;
         const row = parseInt(cell.dataset.row);
