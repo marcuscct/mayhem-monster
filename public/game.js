@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePlayerStats() {
-        const playerColors = ['rgb(189, 28, 28)', 'rgb(176, 238, 7)', 'rgb(0, 255, 0)', 'rgb(0, 0, 255)'];
+        const playerColors = ['rgb(189, 28, 28)', 'rgb(147, 254, 8)', 'rgb(238, 120, 30)', 'rgb(200, 0, 255)'];
         document.getElementById('player-stats').style.color = playerColors[playerNumber - 1];
     }
 
